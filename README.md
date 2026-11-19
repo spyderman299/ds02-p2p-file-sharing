@@ -12,7 +12,7 @@ Bài tập lớn môn Hệ thống phân tán – PTIT.
 ## Thành viên
 | Họ tên | MSSV | Phụ trách |
 |---|---|---|
-| [ Nguyễn Lê Hoàng ] | [B23DCVT172] | Tracker, metadata, kiểm thử |
-| [Lê Anh Vũ] | [MSSV] | Peer, demo, Docker |
+| Nguyễn Lê Hoàng | B23DCVT172 | Tracker, metadata, kiểm thử |
+| Lê Anh Vũ | B23DCVTxxx | Peer, demo, Docker |
 
 *(Đang phát triển)*
