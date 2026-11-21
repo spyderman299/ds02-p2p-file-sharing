@@ -91,4 +91,5 @@ def raw(url, method="GET", body=b"", key=None, headers=None):
         with urllib.request.urlopen(req, timeout=5) as r:
             return r.status
     except urllib.error.HTTPError as e:
+        e.close()
         return e.code
