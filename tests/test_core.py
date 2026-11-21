@@ -1,11 +1,11 @@
-"""Test don vi: python -m unittest discover tests"""
+"""Test don vi cho cac ham co ban."""
 import os, sys, tempfile, unittest
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from common import make_meta, sha  # noqa: E402
+sys.path.insert(0, os.path.dirname(__file__))
+from helpers import make_meta, sha  # noqa: E402
 from peer import parse_range  # noqa: E402
 
 
-class T(unittest.TestCase):
+class TestCore(unittest.TestCase):
     def test_meta(self):
         with tempfile.NamedTemporaryFile(delete=False) as f:
             f.write(os.urandom(150 * 1024)); name = f.name
