@@ -1,7 +1,24 @@
-"""Ham dung chung: bam SHA-256, tao metadata, goi HTTP/JSON, ghi log."""
+"""Ham dung chung: doc cau hinh .env, bam SHA-256, tao metadata, goi HTTP/JSON, ghi log."""
 import hashlib, json, logging, os, sys, urllib.request
 
-DEFAULT_CHUNK = 64 * 1024  # 64 KB / chunk
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def load_env(path=os.path.join(ROOT, ".env")):
+    """Nap bien tu file .env (neu co) vao moi truong; bien da dat san duoc giu nguyen."""
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                k, sep, v = line.strip().partition("=")
+                if sep and not k.startswith("#"):
+                    os.environ.setdefault(k.strip(), v.strip())
+
+
+load_env()
+API_KEY = os.getenv("TRACKER_API_KEY", "")  # khoa bi mat dung chung trong swarm, KHONG commit len GitHub
+DEFAULT_CHUNK = 64 * 1024        # 64 KB / chunk
+MAX_BODY = 1024 * 1024           # gioi han kich thuoc request JSON: 1 MB
+MAX_CHUNK = 4 * 1024 * 1024      # gioi han kich thuoc chunk: 4 MB
 
 
 def sha(b):
@@ -35,8 +52,9 @@ def make_meta(path, tracker, chunk_size=DEFAULT_CHUNK):
 
 
 def http_json(url, data=None, timeout=5):
+    """Gui GET (data=None) hoac POST JSON, kem header X-API-Key de xac thuc."""
     body = json.dumps(data).encode() if data is not None else None
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "X-API-Key": API_KEY})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read())
 

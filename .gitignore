@@ -1,7 +1,7 @@
 data/
 demo_data/
+bench_data/
+share/
 __pycache__/
 *.pyc
 .env
-share/
-bench_data/
