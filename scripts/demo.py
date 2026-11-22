@@ -25,6 +25,13 @@ def peer(name, port, mode, target, *extra):
                  "--dir", os.path.join(D, name), *extra)
 
 
+def wait_for(cond, timeout):
+    """Cho den khi dieu kien dung (thay vi ngu thoi gian co dinh) de demo on dinh tren moi may."""
+    t = time.time()
+    while time.time() - t < timeout and not cond():
+        time.sleep(0.1)
+
+
 def grep(name, key):
     with open(os.path.join(LOGS, f"{name}.log"), encoding="utf-8", errors="ignore") as f:
         return [l.rstrip() for l in f if key in l]
@@ -43,21 +50,26 @@ def main():
         f.write(os.urandom(4 * 1024 * 1024))  # file 4 MB -> 64 chunk
     fid = make_meta(src, TR)["file_id"]
     try:
-        print("[1] Khoi dong tracker + 2 seeder (A tot, B gui hong chunk 0-15)")
-        start("TRACKER", "tracker.py", "--port", "8000"); time.sleep(1)
-        peer("A", 9001, "seed", src, "--slow", "0.15"); time.sleep(1)
-        b = peer("B", 9002, "seed", src, "--slow", "0.15", "--corrupt", "0-15"); time.sleep(1)
+        print("[1] Khoi dong tracker + 2 seeder (A tot, B gui hong chunk 0-31)")
+        start("TRACKER", "tracker.py", "--port", "8000")
+        wait_for(lambda: grep("TRACKER", "Tracker chay"), 30)  # cho tracker san sang
+        peer("A", 9001, "seed", src, "--slow", "0.15")
+        b = peer("B", 9002, "seed", src, "--slow", "0.15", "--corrupt", "0-31")
+        wait_for(lambda: grep("TRACKER", "JOIN peer A") and grep("TRACKER", "JOIN peer B"), 30)  # cho A, B dang ky xong
 
         print(f"[2] C va D cung tai file {fid} song song (moi peer toi da 4 ket noi)")
         c = peer("C", 9003, "get", fid, "--workers", "4", "--slow", "0.15", "--exit-when-done")
         d = peer("D", 9004, "get", fid, "--workers", "4", "--slow", "0.15", "--exit-when-done")
-        time.sleep(2)
+        # cho toi khi da co chunk hong bi phat hien (hoac C tai duoc 1/3 file) roi moi tat B
+        wait_for(lambda: grep("C", "CHUNK KHONG HOP LE") or grep("D", "CHUNK KHONG HOP LE")
+                 or len(grep("C", "OK chunk")) >= 20, 20)
         print("[3] Tat dot ngot seeder B giua luc dang tai")
         b.kill()
         c.wait(120); d.wait(120)
 
         print("[4] Kiem tra tiep tuc tai: E tai, bi tat giua chung, chay lai")
-        e = peer("E", 9005, "get", fid, "--workers", "2", "--slow", "0.15", "--exit-when-done"); time.sleep(2.5)
+        e = peer("E", 9005, "get", fid, "--workers", "2", "--slow", "0.15", "--exit-when-done")
+        wait_for(lambda: len(grep("E", "OK chunk")) >= 10, 30)  # cho E tai duoc 10 chunk roi moi tat
         e.kill(); e.wait(); os.replace(os.path.join(LOGS, "E.log"), os.path.join(LOGS, "E_lan1.log"))
         peer("E", 9005, "get", fid, "--workers", "4", "--exit-when-done").wait(120)
 
