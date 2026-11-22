@@ -1,0 +1,37 @@
+# Moi node chay trong 1 container rieng, giao tiep qua mang Docker "p2p".
+# Chay: docker compose -f deploy/docker-compose.yml up --build
+# Tat 1 nguon giua chung: docker compose -f deploy/docker-compose.yml kill seeder-b
+# Khoa xac thuc lay tu bien moi truong TRACKER_API_KEY (khong ghi cung khoa vao file nay).
+x-peer: &peer
+  build: { context: .., dockerfile: deploy/Dockerfile }
+  depends_on: [tracker]
+  networks: [p2p]
+  volumes: [../share:/share]
+  environment: [TRACKER_API_KEY, FILE_ID]
+
+services:
+  tracker:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    command: python tracker.py --port 8000
+    ports: ["8000:8000"]
+    networks: [p2p]
+    environment: [TRACKER_API_KEY]
+
+  seeder-a:
+    <<: *peer
+    command: sh -c "sleep 2 && python peer.py seed /share/video.bin --id A --port 9001 --host seeder-a --tracker http://tracker:8000 --slow 0.15"
+
+  seeder-b:
+    <<: *peer
+    command: sh -c "sleep 3 && python peer.py seed /share/video.bin --id B --port 9002 --host seeder-b --tracker http://tracker:8000 --slow 0.15 --corrupt 0-15"
+
+  peer-c:
+    <<: *peer
+    command: sh -c "sleep 6 && python peer.py get $${FILE_ID} --id C --port 9003 --host peer-c --tracker http://tracker:8000 --slow 0.15"
+
+  peer-d:
+    <<: *peer
+    command: sh -c "sleep 6 && python peer.py get $${FILE_ID} --id D --port 9004 --host peer-d --tracker http://tracker:8000 --slow 0.15"
+
+networks:
+  p2p: {}
