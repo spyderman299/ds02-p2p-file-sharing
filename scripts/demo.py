@@ -11,6 +11,7 @@ D = os.path.join(ROOT, "demo_data")
 LOGS = os.path.join(D, "logs")
 TR = "http://127.0.0.1:8000"
 procs = []
+SLOW = os.getenv("DEMO_SLOW", "0.15")  # do tre moi lan gui manh (giay); trang trinh bay dat 0.4 cho de xem
 
 
 def start(name, *args):
@@ -53,13 +54,13 @@ def main():
         print("[1] Khoi dong tracker + 2 seeder (A tot, B gui hong chunk 0-31)")
         start("TRACKER", "tracker.py", "--port", "8000")
         wait_for(lambda: grep("TRACKER", "Tracker chay"), 30)  # cho tracker san sang
-        peer("A", 9001, "seed", src, "--slow", "0.15")
-        b = peer("B", 9002, "seed", src, "--slow", "0.15", "--corrupt", "0-31")
+        peer("A", 9001, "seed", src, "--slow", SLOW)
+        b = peer("B", 9002, "seed", src, "--slow", SLOW, "--corrupt", "0-31")
         wait_for(lambda: grep("TRACKER", "JOIN peer A") and grep("TRACKER", "JOIN peer B"), 30)  # cho A, B dang ky xong
 
         print(f"[2] C va D cung tai file {fid} song song (moi peer toi da 4 ket noi)")
-        c = peer("C", 9003, "get", fid, "--workers", "4", "--slow", "0.15", "--exit-when-done")
-        d = peer("D", 9004, "get", fid, "--workers", "4", "--slow", "0.15", "--exit-when-done")
+        c = peer("C", 9003, "get", fid, "--workers", "4", "--slow", SLOW, "--exit-when-done")
+        d = peer("D", 9004, "get", fid, "--workers", "4", "--slow", SLOW, "--exit-when-done")
         # cho toi khi da co chunk hong bi phat hien (hoac C tai duoc 1/3 file) roi moi tat B
         wait_for(lambda: grep("C", "CHUNK KHONG HOP LE") or grep("D", "CHUNK KHONG HOP LE")
                  or len(grep("C", "OK chunk")) >= 20, 20)
@@ -68,7 +69,7 @@ def main():
         c.wait(120); d.wait(120)
 
         print("[4] Kiem tra tiep tuc tai: E tai, bi tat giua chung, chay lai")
-        e = peer("E", 9005, "get", fid, "--workers", "2", "--slow", "0.15", "--exit-when-done")
+        e = peer("E", 9005, "get", fid, "--workers", "2", "--slow", SLOW, "--exit-when-done")
         wait_for(lambda: len(grep("E", "OK chunk")) >= 10, 30)  # cho E tai duoc 10 chunk roi moi tat
         e.kill(); e.wait(); os.replace(os.path.join(LOGS, "E.log"), os.path.join(LOGS, "E_lan1.log"))
         peer("E", 9005, "get", fid, "--workers", "4", "--exit-when-done").wait(120)
