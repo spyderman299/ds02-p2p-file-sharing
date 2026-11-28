@@ -8,13 +8,9 @@ HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG
 
 KHOA CÔNG NGHỆ THÔNG TIN
 
-Giảng viên hướng dẫn: [Tên giảng viên]
-
-Nhóm: [Số nhóm]
-
 Nguyễn Lê Hoàng – B23DCVT172
 
-Lê Anh Vũ – [MSSV]
+Lê Anh Vũ – B23DCAT342
 
 Hà Nội, tháng 11 năm 2026
 :::
@@ -24,7 +20,7 @@ Hà Nội, tháng 11 năm 2026
 | STT | Họ tên | MSSV | Công việc phụ trách |
 |---|---|---|---|
 | 1 | Nguyễn Lê Hoàng | B23DCVT172 | Thiết kế metadata và giao thức tracker; cài đặt `common.py`, `tracker.py`, xác thực API key; test chức năng và bảo mật; đo hiệu năng; báo cáo, slide, README |
-| 2 | Lê Anh Vũ | [MSSV] | Cài đặt `peer.py` (upload, tải song song, đổi nguồn, rarest-first, resume); script demo; test đồng thời, lỗi và hiệu năng; Docker |
+| 2 | Lê Anh Vũ | B23DCAT342 | Cài đặt `peer.py` (upload, tải song song, đổi nguồn, rarest-first, resume); script demo; test đồng thời, lỗi và hiệu năng; Docker |
 
 Hai thành viên cùng thống nhất định dạng metadata và các API của tracker ngay từ đầu. Nhờ vậy mỗi người phát triển và kiểm thử phần của mình độc lập, rồi ghép lại qua giao thức HTTP/JSON đã định trước. Mã nguồn được quản lý trên GitHub, mỗi thành viên commit bằng tài khoản của mình.
 
